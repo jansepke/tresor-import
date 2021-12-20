@@ -62,10 +62,23 @@ const findAmount = (/** @type {Importer.page} */ content) => {
 };
 
 const findDateTime = (/** @type {Importer.page} */ content) => {
-  const lineNumber = content.indexOf('Schlusstag/-Zeit');
+  let dateValue, timeValue;
+  let lineNumber = content.indexOf('Schlusstag/-Zeit');
+
+  if (lineNumber > 0) {
+    dateValue = content[lineNumber + 1];
+    timeValue = content[lineNumber + 2];
+  } else {
+    lineNumber = content.indexOf('Schlusstag');
+
+    if (lineNumber > 0) {
+      dateValue = content[lineNumber + 1];
+    }
+  }
+
   return createActivityDateTime(
-    content[lineNumber + 1],
-    content[lineNumber + 2],
+    dateValue,
+    timeValue,
     undefined,
     'dd.MM.yyyy HH:mm:ss'
   );
@@ -84,7 +97,8 @@ const isBuy = (/** @type {Importer.page} */ content) => {
     lineNumber > 0 &&
     lineNumber + 2 < content.length &&
     content[lineNumber + 1] === 'Abrechnung' &&
-    content[lineNumber + 2] === 'Kauf'
+    (content[lineNumber + 2] === 'Kauf' ||
+      content[lineNumber + 2] === 'Ausgabe')
   );
 };
 
