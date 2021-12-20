@@ -64,5 +64,27 @@ describe('Broker: sBroker27', () => {
         },
       ]);
     });
+
+    test('Can parse document: 2021_IE00BFY0GT14', () => {
+      const result = sbroker.parsePages(buySamples[2]);
+
+      expect(result.status).toEqual(0);
+      expect(result.activities).toEqual([
+        {
+          broker: 'sBroker',
+          type: 'Buy',
+          date: '2021-11-22',
+          datetime: '2021-11-22T' + result.activities[0].datetime.substring(11),
+          isin: 'IE00BFY0GT14',
+          wkn: 'A2N6CW',
+          company: 'SPDR MSCI WORLD UCITS ETF REG.SHARES USD UNHGD ACC. O.N.',
+          shares: 5.2279,
+          price: 28.692209108819984,
+          amount: 150,
+          fee: 3.75,
+          tax: 0,
+        },
+      ]);
+    });
   });
 });
