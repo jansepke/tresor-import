@@ -42,5 +42,27 @@ describe('Broker: sBroker27', () => {
         },
       ]);
     });
+
+    test('Can parse document: 2021_LU0322253906', () => {
+      const result = sbroker.parsePages(buySamples[1]);
+
+      expect(result.status).toEqual(0);
+      expect(result.activities).toEqual([
+        {
+          broker: 'sBroker',
+          type: 'Buy',
+          date: '2021-11-22',
+          datetime: '2021-11-22T' + result.activities[0].datetime.substring(11),
+          isin: 'LU0322253906',
+          wkn: 'DBX1AU',
+          company: 'XTR.MSCI EUROPE SMALL CAP INHABER-ANTEILE 1C O.N.',
+          shares: 3.9327,
+          price: 63.56955781015587,
+          amount: 250,
+          fee: 0,
+          tax: 0,
+        },
+      ]);
+    });
   });
 });
