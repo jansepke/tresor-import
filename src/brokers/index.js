@@ -15,6 +15,7 @@ import * as ing from './ing';
 import * as onvista from './onvista';
 import * as pb from './postbank';
 import * as sbroker from './sbroker';
+import * as sbroker27 from './sbroker27';
 import * as smartbroker from './smartbroker';
 import * as traderepublic from './traderepublic';
 import * as unioninvest from './unioninvest';
@@ -39,6 +40,7 @@ export {
   onvista,
   pb,
   sbroker,
+  sbroker27,
   smartbroker,
   traderepublic,
   unioninvest,
