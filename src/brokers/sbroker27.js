@@ -5,7 +5,7 @@ import {
   createActivityDateTime,
 } from '@/helper';
 
-const parseBuyDocument = (/** @type {Importer.page} */ content) => {
+const parseBuyDocument = (/** @type {Importer.Page} */ content) => {
   content = content.slice(content.indexOf('ISIN'));
 
   const shares = findShares(content);
@@ -30,7 +30,7 @@ const parseBuyDocument = (/** @type {Importer.page} */ content) => {
   return validateActivity(activity);
 };
 
-const parseDividendDocument = (/** @type {Importer.page} */ content) => {
+const parseDividendDocument = (/** @type {Importer.Page} */ content) => {
   content = content.slice(content.indexOf('ISIN'));
 
   const shares = findShares(content);
@@ -69,11 +69,11 @@ const parseDividendDocument = (/** @type {Importer.page} */ content) => {
   return validateActivity(activity);
 };
 
-const findShares = (/** @type {Importer.page} */ content) => {
+const findShares = (/** @type {Importer.Page} */ content) => {
   return Big(parseGermanNum(content[5]));
 };
 
-const findPositionOfIsin = (/** @type {Importer.page} */ content) => {
+const findPositionOfIsin = (/** @type {Importer.Page} */ content) => {
   let position = content.indexOf('Handels-/Ausf');
   if (position > 0) {
     return position;
@@ -85,19 +85,19 @@ const findPositionOfIsin = (/** @type {Importer.page} */ content) => {
   }
 };
 
-const findCompany = (/** @type {Importer.page} */ content) => {
+const findCompany = (/** @type {Importer.Page} */ content) => {
   return content.slice(6, findPositionOfIsin(content) - 2).join(' ');
 };
 
-const findIsin = (/** @type {Importer.page} */ content) => {
+const findIsin = (/** @type {Importer.Page} */ content) => {
   return content[findPositionOfIsin(content) - 2];
 };
 
-const findWkn = (/** @type {Importer.page} */ content) => {
+const findWkn = (/** @type {Importer.Page} */ content) => {
   return content[findPositionOfIsin(content) - 1].replace(/[{()}]/g, '');
 };
 
-const findFee = (/** @type {Importer.page} */ content) => {
+const findFee = (/** @type {Importer.Page} */ content) => {
   let total = Big(0);
 
   const orderFeeLineNumber = content.indexOf('Provision');
@@ -109,21 +109,21 @@ const findFee = (/** @type {Importer.page} */ content) => {
   return +total;
 };
 
-const findAmount = (/** @type {Importer.page} */ content) => {
+const findAmount = (/** @type {Importer.Page} */ content) => {
   return Big(parseGermanNum(content[content.indexOf('Kurswert') + 1]));
 };
 
-const findAmountPayoutGross = (/** @type {Importer.page} */ content) => {
+const findAmountPayoutGross = (/** @type {Importer.Page} */ content) => {
   return Big(
     parseGermanNum(content[content.indexOf('Dividendengutschrift') + 1])
   );
 };
 
-const findAmountPayoutNet = (/** @type {Importer.page} */ content) => {
+const findAmountPayoutNet = (/** @type {Importer.Page} */ content) => {
   return Big(parseGermanNum(content[content.indexOf('Ausmachender') + 2]));
 };
 
-const findDateTime = (/** @type {Importer.page} */ content) => {
+const findDateTime = (/** @type {Importer.Page} */ content) => {
   let dateValue, timeValue;
   let lineNumber = content.indexOf('Schlusstag/-Zeit');
 
@@ -153,7 +153,7 @@ const findDateTime = (/** @type {Importer.page} */ content) => {
 };
 
 /**
- * @param {Importer.page} content
+ * @param {Importer.Page} content
  * @returns {(string | number)[]}
  */
 const findForeignInformation = content => {
@@ -168,7 +168,7 @@ const findForeignInformation = content => {
   ];
 };
 
-const getDocumentType = (/** @type {Importer.page} */ content) => {
+const getDocumentType = (/** @type {Importer.Page} */ content) => {
   if (isBuy(content)) {
     return 'Buy';
   }
@@ -178,7 +178,7 @@ const getDocumentType = (/** @type {Importer.page} */ content) => {
   }
 };
 
-const isBuy = (/** @type {Importer.page} */ content) => {
+const isBuy = (/** @type {Importer.Page} */ content) => {
   const lineNumber = content.indexOf('Wertpapier');
 
   return (
@@ -190,12 +190,12 @@ const isBuy = (/** @type {Importer.page} */ content) => {
   );
 };
 
-const isDividend = (/** @type {Importer.page} */ content) => {
+const isDividend = (/** @type {Importer.Page} */ content) => {
   return content.indexOf('Dividendengutschrift') > 0;
 };
 
 export const canParseDocument = (
-  /** @type {Importer.page[]} */ pages,
+  /** @type {Importer.Page[]} */ pages,
   /** @type {string} */ extension
 ) => {
   const firstPageContent = pages[0];
@@ -213,7 +213,7 @@ export const canParseDocument = (
   );
 };
 
-export const parsePages = (/** @type {Importer.page[]} */ pages) => {
+export const parsePages = (/** @type {Importer.Page[]} */ pages) => {
   const flatContent = pages.flat();
   let activities = [];
 
