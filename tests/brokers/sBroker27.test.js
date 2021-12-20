@@ -1,6 +1,6 @@
 import { findImplementation } from '../../src';
 import * as sbroker from '../../src/brokers/sbroker27';
-import { allSamples, buySamples } from './__mocks__/sbroker27';
+import { allSamples, buySamples, dividendSamples } from './__mocks__/sbroker27';
 
 describe('Broker: sBroker27', () => {
   describe('Check all documents', () => {
@@ -83,6 +83,32 @@ describe('Broker: sBroker27', () => {
           amount: 150,
           fee: 3.75,
           tax: 0,
+        },
+      ]);
+    });
+  });
+
+  describe('Dividend', () => {
+    test('Can parse document: 2021_US88579Y1010', () => {
+      const result = sbroker.parsePages(dividendSamples[0]);
+
+      expect(result.status).toEqual(0);
+      expect(result.activities).toEqual([
+        {
+          broker: 'sBroker',
+          type: 'Buy',
+          date: '2021-12-13',
+          datetime: '2021-12-13T' + result.activities[0].datetime.substring(11),
+          isin: 'US88579Y1010',
+          wkn: '851745',
+          company: '3M CO. REGISTERED SHARES DL -,01',
+          shares: 20,
+          price: 1.305575158786168,
+          amount: 26.11150317572336,
+          fee: 0,
+          tax: 6.67,
+          fxRate: 1.1336,
+          foreignCurrency: 'USD',
         },
       ]);
     });
