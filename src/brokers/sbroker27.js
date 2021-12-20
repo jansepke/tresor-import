@@ -34,12 +34,13 @@ const parseDividendDocument = (/** @type {Importer.page} */ content) => {
   content = content.slice(content.indexOf('ISIN'));
 
   const shares = findShares(content);
-  let amount = findAmountPayout(content);
+  let amount = findAmountPayoutGross(content);
+  const amountNet = findAmountPayoutNet(content);
 
   /** @type {Partial<Importer.Activity>} */
   let activity = {
     broker: 'sBroker',
-    type: 'Buy',
+    type: 'Dividend',
     isin: findIsin(content),
     wkn: findWkn(content),
     company: findCompany(content),
@@ -48,6 +49,7 @@ const parseDividendDocument = (/** @type {Importer.page} */ content) => {
   };
 
   [activity.date, activity.datetime] = findDateTime(content);
+  // @ts-ignore
   [activity.foreignCurrency, activity.fxRate] = findForeignInformation(content);
 
   if (!activity.foreignCurrency) {
@@ -62,7 +64,7 @@ const parseDividendDocument = (/** @type {Importer.page} */ content) => {
 
   activity.amount = +amount;
   activity.price = +amount.div(shares);
-  activity.tax = findTax(content, activity.fxRate || 1);
+  activity.tax = +amount.minus(amountNet);
 
   return validateActivity(activity);
 };
@@ -111,10 +113,14 @@ const findAmount = (/** @type {Importer.page} */ content) => {
   return Big(parseGermanNum(content[content.indexOf('Kurswert') + 1]));
 };
 
-const findAmountPayout = (/** @type {Importer.page} */ content) => {
+const findAmountPayoutGross = (/** @type {Importer.page} */ content) => {
   return Big(
     parseGermanNum(content[content.indexOf('Dividendengutschrift') + 1])
   );
+};
+
+const findAmountPayoutNet = (/** @type {Importer.page} */ content) => {
+  return Big(parseGermanNum(content[content.indexOf('Ausmachender') + 2]));
 };
 
 const findDateTime = (/** @type {Importer.page} */ content) => {
@@ -146,7 +152,11 @@ const findDateTime = (/** @type {Importer.page} */ content) => {
   );
 };
 
-const findForeignInformation = (/** @type {Importer.page} */ content) => {
+/**
+ * @param {Importer.page} content
+ * @returns {(string | number)[]}
+ */
+const findForeignInformation = content => {
   const lineNumber = content.indexOf('Devisenkurs');
   if (lineNumber <= 0) {
     return [undefined, undefined];
@@ -156,58 +166,6 @@ const findForeignInformation = (/** @type {Importer.page} */ content) => {
     content[lineNumber + 2].split(/\s/)[1],
     parseGermanNum(content[lineNumber + 3]),
   ];
-};
-
-const findTax = (
-  /** @type {Importer.page} */ content,
-  /** @type Number */ fxRate
-) => {
-  let total = Big(0);
-
-  // Withholding tax (1)
-  {
-    const taxLineNumber = content.indexOf('Einbehaltene');
-    if (
-      taxLineNumber >= 0 &&
-      taxLineNumber + 1 < content.length &&
-      content[taxLineNumber + 1] === 'Quellensteuer'
-    ) {
-      const withholdingAmount = Big(parseGermanNum(content[taxLineNumber + 4]));
-      total = total.add(+withholdingAmount.div(fxRate));
-    }
-  }
-
-  // Withholding tax (2)
-  {
-    const taxLineNumber = content.indexOf('Verrechnete');
-    if (
-      taxLineNumber >= 0 &&
-      taxLineNumber + 5 < content.length &&
-      content[taxLineNumber + 5] === 'Quellensteuer'
-    ) {
-      total = total.add(
-        parseGermanNum(content[taxLineNumber + 10].split(/\s/)[1])
-      );
-    }
-  }
-
-  // Kapitalertragsteuer
-  {
-    const taxLineNumber = content.indexOf('Kapitalertragsteuer');
-    if (taxLineNumber > 0) {
-      total = total.add(parseGermanNum(content[taxLineNumber + 3]));
-    }
-  }
-
-  // Solidaritätszuschlag
-  {
-    const taxLineNumber = content.indexOf('tszuschlag');
-    if (taxLineNumber > 0) {
-      total = total.add(parseGermanNum(content[taxLineNumber + 3]));
-    }
-  }
-
-  return +total;
 };
 
 const getDocumentType = (/** @type {Importer.page} */ content) => {
