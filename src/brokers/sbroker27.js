@@ -51,7 +51,8 @@ const findFee = (/** @type {Importer.page} */ content) => {
 
   const orderFeeLineNumber = content.indexOf('Provision');
   if (orderFeeLineNumber >= 0) {
-    total = total.add(parseGermanNum(content[orderFeeLineNumber + 1]));
+    const offset = content.indexOf('% vom Kurswert') < 0 ? 0 : 2;
+    total = total.add(parseGermanNum(content[orderFeeLineNumber + offset + 1]));
   }
 
   return +total;
