@@ -96,7 +96,7 @@ describe('Broker: sBroker27', () => {
       expect(result.activities).toEqual([
         {
           broker: 'sBroker',
-          type: 'Buy',
+          type: 'Dividend',
           date: '2021-12-13',
           datetime: '2021-12-13T' + result.activities[0].datetime.substring(11),
           isin: 'US88579Y1010',
@@ -106,8 +106,56 @@ describe('Broker: sBroker27', () => {
           price: 1.305575158786168,
           amount: 26.11150317572336,
           fee: 0,
-          tax: 6.67,
+          tax: 6.671503175723359,
           fxRate: 1.1336,
+          foreignCurrency: 'USD',
+        },
+      ]);
+    });
+
+    test('Can parse document: 2021_NO0003054108', () => {
+      const result = sbroker.parsePages(dividendSamples[1]);
+
+      expect(result.status).toEqual(0);
+      expect(result.activities).toEqual([
+        {
+          broker: 'sBroker',
+          type: 'Dividend',
+          date: '2021-11-29',
+          datetime: '2021-11-29T' + result.activities[0].datetime.substring(11),
+          isin: 'NO0003054108',
+          wkn: '924848',
+          company: 'MOWI ASA NAVNE-AKSJER NK 7,50',
+          shares: 50,
+          price: 0.13571940981445219,
+          amount: 6.785970490722609,
+          fee: 0,
+          tax: 1.695970490722609,
+          fxRate: 10.3154,
+          foreignCurrency: 'NOK',
+        },
+      ]);
+    });
+
+    test('Can parse document: 2021_US1713401024', () => {
+      const result = sbroker.parsePages(dividendSamples[2]);
+
+      expect(result.status).toEqual(0);
+      expect(result.activities).toEqual([
+        {
+          broker: 'sBroker',
+          type: 'Dividend',
+          date: '2021-12-01',
+          datetime: '2021-12-01T' + result.activities[0].datetime.substring(11),
+          isin: 'US1713401024',
+          wkn: '864371',
+          company: 'CHURCH & DWIGHT CO. INC. REGISTERED SHARES DL 1',
+          shares: 10,
+          price: 0.22255453905700212,
+          amount: 2.225545390570021,
+          fee: 0,
+          tax: 0.32554539057002113,
+          fxRate: 1.1368,
           foreignCurrency: 'USD',
         },
       ]);
