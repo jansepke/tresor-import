@@ -18,7 +18,7 @@ const parseBuyDocument = (/** @type {Importer.Page} */ content) => {
     isin: findIsin(content),
     wkn: findWkn(content),
     company: findCompany(content),
-    shares: +shares,
+    shares: shares,
     amount: +amount,
     price: +amount.div(shares),
     fee: findFee(content),
@@ -33,10 +33,6 @@ const parseBuyDocument = (/** @type {Importer.Page} */ content) => {
 const parseDividendDocument = (/** @type {Importer.Page} */ content) => {
   content = content.slice(content.indexOf('ISIN'));
 
-  const shares = findShares(content);
-  let amount = findAmountPayoutGross(content);
-  const amountNet = findAmountPayoutNet(content);
-
   /** @type {Partial<Importer.Activity>} */
   let activity = {
     broker: 'sBroker',
@@ -44,33 +40,32 @@ const parseDividendDocument = (/** @type {Importer.Page} */ content) => {
     isin: findIsin(content),
     wkn: findWkn(content),
     company: findCompany(content),
-    shares: +shares,
+    shares: findShares(content),
     fee: findFee(content),
   };
 
-  [activity.date, activity.datetime] = findDateTime(content);
   // @ts-ignore
   [activity.foreignCurrency, activity.fxRate] = findForeignInformation(content);
+  [activity.date, activity.datetime] = findDateTime(content);
 
-  if (!activity.foreignCurrency) {
-    delete activity.foreignCurrency;
-  }
+  let amount = findAmountPayoutGross(content);
 
-  if (!activity.fxRate) {
-    delete activity.fxRate;
-  } else {
+  if (activity.fxRate && activity.foreignCurrency) {
     amount = amount.div(activity.fxRate);
+  } else {
+    delete activity.foreignCurrency;
+    delete activity.fxRate;
   }
 
   activity.amount = +amount;
-  activity.price = +amount.div(shares);
-  activity.tax = +amount.minus(amountNet);
+  activity.price = +amount.div(activity.shares);
+  activity.tax = +amount.minus(findAmountPayoutNet(content));
 
   return validateActivity(activity);
 };
 
 const findShares = (/** @type {Importer.Page} */ content) => {
-  return Big(parseGermanNum(content[5]));
+  return parseGermanNum(content[5]);
 };
 
 const findPositionOfIsin = (/** @type {Importer.Page} */ content) => {
